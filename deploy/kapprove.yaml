@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: kube-system
+  name: kapprover
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+  name: tls-approver
+spec:
+  ports:
+  - port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    k8s-app: tls-approver
+  sessionAffinity: None
+  type: ClusterIP
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kapprover
+rules:
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["certificatesigningrequests" ]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["certificatesigningrequests/approval"]
+  verbs: ["update"]
+- apiGroups: [""]
+  resources: ["pods", "services"]
+  verbs: ["list"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kapprover
+  namespace: kube-system
+roleRef:
+  name: kapprover
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+subjects:
+- kind: ServiceAccount
+  name: kapprover
+  namespace: kube-system
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: cert-requester
+rules:
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["certificatesigningrequests" ]
+  verbs: ["create", "get"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: cert-requester
+roleRef:
+  name: cert-requester
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+subjects:
+- kind: Group
+  name: system:serviceaccounts
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: services-lister
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: services-lister
+roleRef:
+  name: services-lister
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+subjects:
+- kind: Group
+  name: system:serviceaccounts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tls-approver
+  namespace: kube-system
+  labels:
+    k8s-app: tls-approver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: tls-approver
+  template:
+    metadata:
+      name: tls-approver
+      labels:
+        k8s-app: tls-approver
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.kubernetes.io/role
+                    operator: In
+                    values:
+                      - master
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      serviceAccountName: kapprover
+      containers:
+      - name: tls-approver
+        image: proofpoint/kapprover:0.6.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+          protocol: TCP
+        args:
+          #- -filter=group=system:serviceaccounts
+          #- -denier=signaturealgorithm=SHA256WithRSA,SHA384WithRSA,SHA512WithRSA,SHA256WithRSAPSS,SHA384WithRSAPSS,SHA512WithRSAPSS
+          #- -denier=minrsakeysize=3072
+          #- -denier=noextensions
+          #- -denier=keyusage=digital_signature,key_encipherment,server_auth,client_auth
+          #- -denier=subjectispodforuser
+          #- -denier=altnamesforpod
+          - -delete-after=1m
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 100m
+            memory: 50Mi

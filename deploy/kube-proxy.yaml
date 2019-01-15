@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-proxy
+  namespace: kube-system
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: system:kube-proxy
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+subjects:
+  - kind: ServiceAccount
+    name: kube-proxy
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: system:node-proxier
+  apiGroup: rbac.authorization.k8s.io
+---
+# Please keep kube-proxy configuration in-sync with:
+# cluster/saltbase/salt/kube-proxy/kube-proxy.manifest
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: kube-proxy
+    addonmanager.kubernetes.io/mode: Reconcile
+  name: kube-proxy
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: kube-proxy
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 10%
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-proxy
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      priorityClassName: system-node-critical
+      hostNetwork: true
+      tolerations:
+      - operator: "Exists"
+        effect: "NoExecute"
+      - operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - name: kube-proxy
+        image: k8s.gcr.io/kube-proxy-amd64:v1.10.2
+        command:
+        - /bin/sh
+        - -c
+        - kube-proxy --config=/etc/kube-proxy/config/kube-proxy-config.yaml --logtostderr
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/kube-proxy/kubeconfig
+          name: kubeconfig
+          readOnly: true
+        - mountPath: /etc/kube-proxy/config
+          name: config
+      volumes:
+      - hostPath:
+          path: /var/lib/kube-proxy
+          type: ""
+        name: kubeconfig
+      - name: config
+        configMap:
+          name: kube-proxy-config
+      serviceAccountName: kube-proxy
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-proxy-config
+  namespace: kube-system
+data:
+  kube-proxy-config.yaml: |
+    kind: KubeProxyConfiguration
+    apiVersion: kubeproxy.config.k8s.io/v1alpha1
+    clientConnection:
+      kubeconfig: "/etc/kube-proxy/kubeconfig/kubeconfig"
+    mode: "iptables"
+    clusterCIDR: "10.200.0.0/16"
