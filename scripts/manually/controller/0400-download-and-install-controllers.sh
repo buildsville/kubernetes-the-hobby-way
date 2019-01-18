@@ -5,6 +5,7 @@ sudo apt-get update
 sudo apt-get -y install socat conntrack ipset
 
 wget -q --show-progress --https-only --timestamping \
+  https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl \
   https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubelet \
   https://github.com/kubernetes-incubator/cri-tools/releases/download/v1.13.0/crictl-v1.13.0-linux-amd64.tar.gz \
   https://storage.googleapis.com/kubernetes-the-hard-way/runsc \
@@ -21,9 +22,9 @@ sudo mkdir -p \
   /var/run/kubernetes \
   /etc/containerd
 
-chmod +x kubelet runc.amd64 runsc
+chmod +x kubectl kubelet runc.amd64 runsc
 sudo mv runc.amd64 runc
-sudo mv kubelet runc runsc /usr/local/bin/
+sudo mv kubectl kubelet runc runsc /usr/local/bin/
 sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 sudo tar -xvf crictl-v1.13.0-linux-amd64.tar.gz -C /usr/local/bin/
 sudo tar -xvf containerd-1.2.2.linux-amd64.tar.gz -C /

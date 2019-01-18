@@ -4,6 +4,6 @@
 cd `dirname $0`
 cd ../../../deploy
 
-kubectl apply -f calico.yaml
+kubectl apply -f flannel.yaml
 kubectl apply -f kube-proxy.yaml
 kubectl apply -f kube-dns.yaml
