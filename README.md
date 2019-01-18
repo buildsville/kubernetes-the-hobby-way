@@ -9,11 +9,9 @@ There are some changes from these original.
 
 - Control components run as Kubernetes Pods.
   - using kubelet's flag `--pod-manifest-path`
-- Use calico.
+- Use flannel.
 - Use tls-bootstraping with bootstrap-token.
 - Enable --allocate-node-cidr in kube-controller-manager
-- Use Docker for container runtime.
-  - I didn't know how to configure multi host network with combination of containerd and calico.
 - Prefix number of scripts is not related to the head chapter number.
   - Became impossible to match while changing.
 
