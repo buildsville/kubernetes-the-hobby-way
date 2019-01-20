@@ -33,10 +33,10 @@ Vagrant.configure("2") do |config|
         c.vm.hostname = "controller-#{n}"
         c.vm.network "private_network", ip: ip
 
-        c.vm.provision :shell, :inline => "sudo ip addr flush dev eth1"
-        c.vm.provision :shell, :inline => "sudo ip addr add #{ip}/24 dev eth1"
         c.vm.provision :shell, :inline => "sudo swapoff -a"
         c.vm.provision :shell, :inline => "sed -i -e '/swap/d' /etc/fstab"
+        c.vm.provision :shell, :inline => "sysctl -w net.ipv4.conf.all.forwarding=1"
+        c.vm.provision :shell, :inline => "echo 'net.ipv4.conf.all.forwarding = 1' >> /etc/sysctl.conf"
         c.vm.provision :shell, :path => "scripts/init/vagrant-setup-hosts-file.sh"
 
         c.vm.provider "virtualbox" do |vb|
@@ -52,10 +52,10 @@ Vagrant.configure("2") do |config|
         c.vm.hostname = "worker-#{n}"
         c.vm.network "private_network", ip: ip
 
-        c.vm.provision :shell, :inline => "sudo ip addr flush dev eth1"
-        c.vm.provision :shell, :inline => "sudo ip addr add #{ip}/24 dev eth1"
         c.vm.provision :shell, :inline => "sudo swapoff -a"
         c.vm.provision :shell, :inline => "sed -i -e '/swap/d' /etc/fstab"
+        c.vm.provision :shell, :inline => "sysctl -w net.ipv4.conf.all.forwarding=1"
+        c.vm.provision :shell, :inline => "echo 'net.ipv4.conf.all.forwarding = 1' >> /etc/sysctl.conf"
         c.vm.provision :shell, :path => "scripts/init/vagrant-setup-hosts-file.sh"
     end
   end

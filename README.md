@@ -9,7 +9,7 @@ There are some changes from these original.
 
 - Control components run as Kubernetes Pods.
   - using kubelet's flag `--pod-manifest-path`
-- Use flannel.
+- Use calico.
 - Use tls-bootstraping with bootstrap-token.
 - Enable --allocate-node-cidr in kube-controller-manager
 - Prefix number of scripts is not related to the head chapter number.

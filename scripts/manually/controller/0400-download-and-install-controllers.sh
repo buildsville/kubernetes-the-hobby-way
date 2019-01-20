@@ -11,7 +11,6 @@ wget -q --show-progress --https-only --timestamping \
   https://storage.googleapis.com/kubernetes-the-hard-way/runsc \
   https://github.com/opencontainers/runc/releases/download/v1.0.0-rc6/runc.amd64 \
   https://github.com/containerd/containerd/releases/download/v1.2.2/containerd-1.2.2.linux-amd64.tar.gz \
-  https://github.com/containernetworking/plugins/releases/download/v0.6.0/cni-plugins-amd64-v0.6.0.tgz
 
 sudo mkdir -p \
   /etc/cni/net.d \
@@ -28,4 +27,3 @@ sudo mv kubectl kubelet runc runsc /usr/local/bin/
 sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 sudo tar -xvf crictl-v1.13.0-linux-amd64.tar.gz -C /usr/local/bin/
 sudo tar -xvf containerd-1.2.2.linux-amd64.tar.gz -C /
-sudo tar -xvf cni-plugins-amd64-v0.6.0.tgz -C /opt/cni/bin/
