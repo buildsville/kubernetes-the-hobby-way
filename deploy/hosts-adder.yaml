@@ -22,6 +22,8 @@ spec:
         - name: hosts-adder
           image: masahata/node-hosts-adder
           args: ["-logtostderr","-hostsFilePath=/mnt/etc/hosts"]
+          securityContext:
+            privileged: true
           volumeMounts:
             - name: hosts
               mountPath: /mnt/etc/hosts
