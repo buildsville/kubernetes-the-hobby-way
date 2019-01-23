@@ -8,6 +8,7 @@ sudo mv ca.pem ca-key.pem /var/lib/kubernetes/
 sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 
 KUBERNETES_PUBLIC_ADDRESS=10.240.0.40
+INTERNAL_IP=$(ifconfig eth1 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
 
 cat <<EOF | sudo tee /var/lib/kubelet/kubelet-config.yaml
 kind: KubeletConfiguration
@@ -69,6 +70,7 @@ ExecStart=/usr/local/bin/kubelet \\
   --allow-privileged=true \\
   --node-labels=node.kubernetes.io/role=node,node-role.kubernetes.io/node= \\
   --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig \\
+  --node-ip=${INTERNAL_IP} \\
   --v=2
 Restart=on-failure
 RestartSec=5

@@ -6,6 +6,8 @@ sudo mv ${HOSTNAME}.kubeconfig /var/lib/kubelet/kubeconfig
 sudo mv ca.pem /var/lib/kubernetes/
 sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 
+INTERNAL_IP=$(ifconfig eth1 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+
 cat <<EOF | sudo tee /var/lib/kubelet/kubelet-config.yaml
 kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
@@ -46,6 +48,7 @@ ExecStart=/usr/local/bin/kubelet \\
   --pod-manifest-path=/etc/kubernetes/manifests \\
   --node-labels=node.kubernetes.io/role=master,node-role.kubernetes.io/master= \\
   --register-with-taints=node.kubernetes.io/role=master:NoSchedule \\
+  --node-ip=${INTERNAL_IP} \\
   --v=2
 Restart=on-failure
 RestartSec=5
