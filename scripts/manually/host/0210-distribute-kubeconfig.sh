@@ -12,3 +12,5 @@ for instance in controller-0 controller-1 controller-2; do
   vagrant scp kube-controller-manager.kubeconfig ${instance}:~/
   vagrant scp kube-scheduler.kubeconfig ${instance}:~/
 done
+
+vagrant scp node-hosts-converter.kubeconfig lb-0:~/

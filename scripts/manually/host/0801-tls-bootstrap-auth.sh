@@ -18,4 +18,4 @@ else
 fi
 
 kubectl apply -f tls-bootstrap-auth.yaml
-#kubectl apply -f kapprove.yaml
+kubectl apply -f kapprove.yaml

@@ -7,6 +7,8 @@ sudo mkdir -p /etc/kubernetes/config/
 sudo cp ca.pem /var/lib/kubernetes/
 sudo mv ca-key.pem kubernetes-key.pem kubernetes.pem \
   service-account-key.pem service-account.pem \
+  aggregator-key.pem aggregator.pem \
+  metrics-server-key.pem metrics-server.pem \
   encryption-config.yaml /var/lib/kubernetes/
 
 INTERNAL_IP=$(ifconfig eth1 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
@@ -57,6 +59,14 @@ spec:
       - "--tls-cert-file=/var/lib/kubernetes/kubernetes.pem"
       - "--tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem"
       - "--enable-bootstrap-token-auth=true"
+      - "--requestheader-client-ca-file=/var/lib/kubernetes/ca.pem"
+      - "--requestheader-allowed-names=aggregator"
+      - "--requestheader-extra-headers-prefix=X-Remote-Extra-"
+      - "--requestheader-group-headers=X-Remote-Group"
+      - "--requestheader-username-headers=X-Remote-User"
+      - "--enable-aggregator-routing=false"
+      - "--proxy-client-cert-file=/var/lib/kubernetes/aggregator.pem"
+      - "--proxy-client-key-file=/var/lib/kubernetes/aggregator-key.pem"
       - "--v=2"
     ports:
     - containerPort: 6443
