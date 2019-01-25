@@ -15,4 +15,8 @@ for instance in controller-0 controller-1 controller-2; do
   vagrant scp service-account.pem ${instance}:~/
   vagrant scp ${instance}-key.pem ${instance}:~/
   vagrant scp ${instance}.pem ${instance}:~/
+  vagrant scp aggregator-key.pem ${instance}:~/
+  vagrant scp aggregator.pem ${instance}:~/
+  vagrant scp metrics-server-key.pem ${instance}:~/
+  vagrant scp metrics-server.pem ${instance}:~/
 done

@@ -1,13 +1,12 @@
 #!/bin/bash
-### create worker kubelet service and config file ###
+### create controller kubelet service and config file ###
 
-TOKEN_ID=`cat token-id.txt`
-TOKEN_SECRET=`cat token-secret.txt`
-
-sudo mv ca.pem ca-key.pem /var/lib/kubernetes/
+sudo mv ${HOSTNAME}-key.pem ${HOSTNAME}.pem /var/lib/kubelet/
+sudo mv ${HOSTNAME}.kubeconfig /var/lib/kubelet/kubeconfig
+sudo mv ca.pem /var/lib/kubernetes/
 sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 
-KUBERNETES_PUBLIC_ADDRESS=10.240.0.40
+INTERNAL_IP=$(ifconfig eth1 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
 
 cat <<EOF | sudo tee /var/lib/kubelet/kubelet-config.yaml
 kind: KubeletConfiguration
@@ -25,29 +24,8 @@ clusterDomain: "cluster.local"
 clusterDNS:
   - "10.32.0.10"
 runtimeRequestTimeout: "15m"
-serverTLSBootstrap: true
-rotateCertificates: true
-EOF
-
-cat <<EOF | sudo tee /var/lib/kubelet/bootstrap-kubeconfig
-apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority: /var/lib/kubernetes/ca.pem
-    server: https://${KUBERNETES_PUBLIC_ADDRESS}:6443
-  name: bootstrap
-contexts:
-- context:
-    cluster: bootstrap
-    user: kubelet-bootstrap
-  name: bootstrap
-current-context: bootstrap
-kind: Config
-preferences: {}
-users:
-- name: kubelet-bootstrap
-  user:
-    token: ${TOKEN_ID}.${TOKEN_SECRET}
+tlsCertFile: "/var/lib/kubelet/${HOSTNAME}.pem"
+tlsPrivateKeyFile: "/var/lib/kubelet/${HOSTNAME}-key.pem"
 EOF
 
 cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
@@ -67,8 +45,10 @@ ExecStart=/usr/local/bin/kubelet \\
   --network-plugin=cni \\
   --register-node=true \\
   --allow-privileged=true \\
-  --node-labels=node.kubernetes.io/role=node,node-role.kubernetes.io/node= \\
-  --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig \\
+  --pod-manifest-path=/etc/kubernetes/manifests \\
+  --node-labels=node.kubernetes.io/role=master,node-role.kubernetes.io/master= \\
+  --register-with-taints=node.kubernetes.io/role=master:NoSchedule \\
+  --node-ip=${INTERNAL_IP} \\
   --v=2
 Restart=on-failure
 RestartSec=5
