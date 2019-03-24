@@ -16,7 +16,6 @@ sudo mkdir -p \
   /etc/cni/net.d \
   /opt/cni/bin \
   /var/lib/kubelet \
-  /var/lib/kube-proxy \
   /var/lib/kubernetes \
   /var/run/kubernetes \
   /etc/containerd
@@ -24,6 +23,5 @@ sudo mkdir -p \
 chmod +x kubectl kubelet runc.amd64 runsc
 sudo mv runc.amd64 runc
 sudo mv kubectl kubelet runc runsc /usr/local/bin/
-sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 sudo tar -xvf crictl-v1.13.0-linux-amd64.tar.gz -C /usr/local/bin/
 sudo tar -xvf containerd-1.2.2.linux-amd64.tar.gz -C /

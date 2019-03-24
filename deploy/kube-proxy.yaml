@@ -64,16 +64,9 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-        - mountPath: /etc/kube-proxy/kubeconfig
-          name: kubeconfig
-          readOnly: true
         - mountPath: /etc/kube-proxy/config
           name: config
       volumes:
-      - hostPath:
-          path: /var/lib/kube-proxy
-          type: ""
-        name: kubeconfig
       - name: config
         configMap:
           name: kube-proxy-config
@@ -89,6 +82,24 @@ data:
     kind: KubeProxyConfiguration
     apiVersion: kubeproxy.config.k8s.io/v1alpha1
     clientConnection:
-      kubeconfig: "/etc/kube-proxy/kubeconfig/kubeconfig"
+      kubeconfig: "/etc/kube-proxy/config/kubeconfig"
     mode: "iptables"
     clusterCIDR: "10.200.0.0/16"
+  kubeconfig: |
+    apiVersion: v1
+    kind: Config
+    clusters:
+    - name: kubernetes
+      cluster:
+        certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        server: https://10.240.0.40:6443
+    users:
+    - name: kube-proxy
+      user:
+        tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    contexts:
+    - context:
+        cluster: kubernetes
+        user: kube-proxy
+      name: default
+    current-context: default
