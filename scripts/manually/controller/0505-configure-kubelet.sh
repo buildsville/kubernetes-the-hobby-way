@@ -25,6 +25,15 @@ clusterDNS:
 runtimeRequestTimeout: "15m"
 tlsCertFile: "/var/lib/kubelet/${HOSTNAME}.pem"
 tlsPrivateKeyFile: "/var/lib/kubelet/${HOSTNAME}-key.pem"
+kubeReserved:
+  cpu: "100m"
+  memory: "100Mi"
+kubeReservedCgroup: "/runtime.slice"
+systemReserved:
+  cpu: "100m"
+  memory: "100Mi"
+systemReservedCgroup: "/system.slice"
+kubeletCgroups: "/runtime.slice"
 EOF
 
 cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
@@ -35,6 +44,10 @@ After=containerd.service
 Requires=containerd.service
 
 [Service]
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuset/system.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/hugetlb/system.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/cpuset/runtime.slice
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/hugetlb/runtime.slice
 ExecStart=/usr/local/bin/kubelet \\
   --config=/var/lib/kubelet/kubelet-config.yaml \\
   --container-runtime=remote \\
@@ -48,9 +61,14 @@ ExecStart=/usr/local/bin/kubelet \\
   --node-labels=node.kubernetes.io/role=master,node-role.kubernetes.io/master= \\
   --register-with-taints=node.kubernetes.io/role=master:NoSchedule \\
   --node-ip=${INTERNAL_IP} \\
+  --cgroup-root="/" \\
+  --system-cgroups="/system.slice" \\
+  --runtime-cgroups="/runtime.slice" \\
+  --enforce-node-allocatable="pods" \\
   --v=2
 Restart=on-failure
 RestartSec=5
+Slice=/runtime.slice
 
 [Install]
 WantedBy=multi-user.target

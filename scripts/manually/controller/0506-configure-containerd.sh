@@ -36,6 +36,7 @@ OOMScoreAdjust=-999
 LimitNOFILE=1048576
 LimitNPROC=infinity
 LimitCORE=infinity
+Slice=/runtime.slice
 
 [Install]
 WantedBy=multi-user.target
