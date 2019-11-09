@@ -8,7 +8,7 @@ cat <<EOF | sudo tee /etc/coredns/Corefile
         hosts /etc/node-hosts-converter/hosts {
                 fallthrough
         }
-        proxy . 8.8.8.8 8.8.4.4
+        forward . 8.8.8.8 8.8.4.4
         loop
         reload
 }
