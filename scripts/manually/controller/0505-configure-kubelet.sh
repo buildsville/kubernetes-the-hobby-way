@@ -56,9 +56,8 @@ ExecStart=/usr/local/bin/kubelet \\
   --kubeconfig=/var/lib/kubelet/kubeconfig \\
   --network-plugin=cni \\
   --register-node=true \\
-  --allow-privileged=true \\
   --pod-manifest-path=/etc/kubernetes/manifests \\
-  --node-labels=node.kubernetes.io/role=master,node-role.kubernetes.io/master= \\
+  --node-labels=node.kubernetes.io/role=master \\
   --register-with-taints=node.kubernetes.io/role=master:NoSchedule \\
   --node-ip=${INTERNAL_IP} \\
   --cgroup-root="/" \\

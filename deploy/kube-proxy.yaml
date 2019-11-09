@@ -56,7 +56,7 @@ spec:
         effect: "NoSchedule"
       containers:
       - name: kube-proxy
-        image: k8s.gcr.io/kube-proxy-amd64:v1.10.2
+        image: k8s.gcr.io/kube-proxy-amd64:v1.16.2
         command:
         - /bin/sh
         - -c

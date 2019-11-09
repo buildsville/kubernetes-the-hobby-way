@@ -26,7 +26,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-scheduler
-    image: k8s.gcr.io/kube-scheduler-amd64:v1.13.2
+    image: k8s.gcr.io/kube-scheduler-amd64:v1.16.2
     command:
       - "/usr/local/bin/kube-scheduler"
       - "--config=/etc/kubernetes/config/kube-scheduler.yaml"

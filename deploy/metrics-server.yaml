@@ -4,7 +4,7 @@ metadata:
   name: metrics-server
   namespace: kube-system
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: metrics-server
@@ -43,7 +43,7 @@ spec:
           path: /var/lib/kubernetes/
       containers:
       - name: metrics-server
-        image: k8s.gcr.io/metrics-server-amd64:v0.3.1
+        image: k8s.gcr.io/metrics-server-amd64:v0.3.6
         imagePullPolicy: Always
         args: 
           - "--tls-cert-file=/mnt/pki/metrics-server.pem"
