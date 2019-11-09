@@ -79,8 +79,7 @@ ExecStart=/usr/local/bin/kubelet \\
   --kubeconfig=/var/lib/kubelet/kubeconfig \\
   --network-plugin=cni \\
   --register-node=true \\
-  --allow-privileged=true \\
-  --node-labels=node.kubernetes.io/role=node,node-role.kubernetes.io/node= \\
+  --node-labels=node.kubernetes.io/role=worker \\
   --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig \\
   --node-ip=${INTERNAL_IP} \\
   --cgroup-root="/" \\
