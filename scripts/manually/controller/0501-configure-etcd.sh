@@ -21,7 +21,7 @@ spec:
   hostNetwork: true
   containers:
   - name: etcd
-    image: "k8s.gcr.io/etcd-amd64:3.3.10"
+    image: "k8s.gcr.io/etcd-amd64:3.4.3"
     resources:
       requests:
         cpu: "0.1"

@@ -17,7 +17,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-controller-manager
-    image: k8s.gcr.io/kube-controller-manager-amd64:v1.13.2
+    image: k8s.gcr.io/kube-controller-manager-amd64:v1.16.2
     command:
       - "/usr/local/bin/kube-controller-manager"
       - "--address=0.0.0.0"
